@@ -4,10 +4,6 @@ inputs:
   node-auth-token:
     description: "GitHub token for npm auth"
     required: true
-# outputs:
-#   is-lerna:
-#     description: "Indicates if the project is a Lerna project"
-#     value: ${{ steps.check_and_bump.outputs.is_lerna }}
 
 runs:
   using: "composite"
