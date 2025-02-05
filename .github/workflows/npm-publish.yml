@@ -16,7 +16,8 @@ on:
         description: "NPM registry URL"
         required: false
       update-nc-dependency:
-        default: "false"
+        type: boolean
+        default: false
         description: "Update dependencies"
         required: false
 
@@ -35,22 +36,12 @@ jobs:
         with:
           node-version: ${{ github.event.inputs.node-version }}
           registry-url: ${{ github.event.inputs.registry-url }}
-        env:
-            NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --legacy-peer-deps
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Check if build script exists and run build
-        run: |
-          if npm run | grep -q "build"; then
-            npm run build
-          else
-            echo "Build script not found in package.json. Stopping workflow."
-            exit 1
-          fi
 
       - name: Update dependencies
         if: ${{ github.event.inputs.update-nc-dependency == 'true' }}
@@ -58,12 +49,22 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+
       - name: Update package version
         run: |
             npm version ${{ github.event.inputs.version }} --no-git-tag-version
 
             git diff --color
             git diff >> changes.txt
+
+      - name: Check if build script exists and run build
+        run: |
+            if npm run | grep -q "build"; then
+              npm run build
+            else
+              echo "Build script not found in package.json. Stopping workflow."
+              exit 1
+            fi
 
     #   - name: Commit version update
     #     run: |
