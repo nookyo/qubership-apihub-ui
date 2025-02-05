@@ -42,20 +42,12 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Check if build script exists and run build
-        run: |
-          if npm run | grep -q "build"; then
-            npm run build
-          else
-            echo "Build script not found in package.json. Stopping workflow."
-            exit 1
-          fi
-
       - name: Update dependencies
         if: ${{ github.event.inputs.update-nc-dependency == 'true' }}
         run: npm ls --json |  jq -r '.dependencies | keys[]' | grep "@netcracker" | xargs --no-run-if-empty npm update
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 
       - name: Update package version
         run: |
@@ -63,6 +55,15 @@ jobs:
 
             git diff --color
             git diff >> changes.txt
+
+      - name: Check if build script exists and run build
+        run: |
+            if npm run | grep -q "build"; then
+              npm run build
+            else
+              echo "Build script not found in package.json. Stopping workflow."
+              exit 1
+            fi
 
     #   - name: Commit version update
     #     run: |
