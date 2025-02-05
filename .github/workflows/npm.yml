@@ -24,7 +24,7 @@ jobs:
       - name: Run Dependency & Version Manager
         uses: ./actions/npm-manager
         env:
-                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Check Changes After Version Bump
         run: |
