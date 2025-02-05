@@ -21,16 +21,16 @@ jobs:
         env:
             NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Run Dependency & Version Manager
-        uses: ./actions/npm-manager
-        env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #   - name: Run Dependency & Version Manager
+    #     uses: ./actions/npm-manager
+    #     env:
+    #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Check Changes After Version Bump
-        run: |
-          if [ -s changes.txt ]; then
-            echo "Detected changes after version bump:"
-            cat changes.txt
-          else
-            echo "No changes detected."
-          fi
+    #   - name: Check Changes After Version Bump
+    #     run: |
+    #       if [ -s changes.txt ]; then
+    #         echo "Detected changes after version bump:"
+    #         cat changes.txt
+    #       else
+    #         echo "No changes detected."
+    #       fi
