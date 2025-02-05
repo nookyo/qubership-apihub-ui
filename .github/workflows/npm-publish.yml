@@ -56,14 +56,31 @@ jobs:
             git diff --color
             git diff >> changes.txt
 
-    #   - name: Check if build script exists and run build
-    #     run: |
-    #         if npm run | grep -q "build"; then
-    #           npm run build
-    #         else
-    #           echo "Build script not found in package.json. Stopping workflow."
-    #           exit 1
-    #         fi
+
+      - name: Check if build script exists and run build
+        run: |
+            if npm run | grep -q "build"; then
+              npm run build
+            else
+              echo "Build script not found in package.json. Stopping workflow."
+              exit 1
+            fi
+
+        # run: npm run build --if-present
+
+      - name: Run tests
+        run: npm test --if-present
+
+      - name: Get package version
+        id: get_version
+        run: |
+          if [ "$IS_LERNA" == "true" ]; then
+            VERSION=$(lerna list --json | jq -r '.[0].version')
+          else
+            VERSION=$(jq -r '.version' package.json)
+          fi
+          echo "package_version=$VERSION" >> $GITHUB_OUTPUT
+
 
     #   - name: Commit version update
     #     run: |
