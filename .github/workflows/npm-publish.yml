@@ -17,7 +17,7 @@ on:
         required: false
       update-nc-dependency:
         type: boolean
-        default: false
+        default: true
         description: "Update dependencies"
         required: false
 
@@ -41,33 +41,20 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-        #   - name: Checkout Repository
-        #   uses: actions/checkout@v4
-  
-        # - name: Setup Node.js
-        #   uses: actions/setup-node@v4
-        #   with:
-        #     node-version: '20'
-        #     registry-url: 'https://npm.pkg.github.com/'
-  
-        # - name: Install dependencies
-        #   run: npm ci --legacy-peer-deps
-        #   env:
-        #       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    #   - name: Update dependencies
-    #     if: ${{ github.event.inputs.update-nc-dependency == 'true' }}
-    #     run: npm ls --json |  jq -r '.dependencies | keys[]' | grep "@netcracker" | xargs --no-run-if-empty npm update
-    #     env:
-    #       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Update dependencies
+        if: ${{ github.event.inputs.update-nc-dependency == 'true' }}
+        run: npm ls --json |  jq -r '.dependencies | keys[]' | grep "@netcracker" | xargs --no-run-if-empty npm update
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 
-    #   - name: Update package version
-    #     run: |
-    #         npm version ${{ github.event.inputs.version }} --no-git-tag-version
+      - name: Update package version
+        run: |
+            npm version ${{ github.event.inputs.version }} --no-git-tag-version
 
-    #         git diff --color
-    #         git diff >> changes.txt
+            git diff --color
+            git diff >> changes.txt
 
     #   - name: Check if build script exists and run build
     #     run: |
