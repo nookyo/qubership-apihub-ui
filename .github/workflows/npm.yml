@@ -1,4 +1,4 @@
-name: Manual Trigger - Update Dependencies & Bump Version
+name: Update & Bump
 
 on:
   workflow_dispatch: # Позволяет запускать вручную через GitHub Actions UI
