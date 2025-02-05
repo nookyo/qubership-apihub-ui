@@ -16,7 +16,8 @@ on:
         description: "NPM registry URL"
         required: false
       update-nc-dependency:
-        default: "false"
+        type: boolean
+        default: false
         description: "Update dependencies"
         required: false
 
