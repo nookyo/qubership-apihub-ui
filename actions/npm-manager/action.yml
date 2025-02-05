@@ -1,13 +1,9 @@
-name: "Update Dependencies & Bump Version"
+name: "Update & Bump Version"
 description: ""
 inputs:
   node-auth-token:
     description: "GitHub token for npm auth"
     required: true
-# outputs:
-#   is-lerna:
-#     description: "Indicates if the project is a Lerna project"
-#     value: ${{ steps.check_and_bump.outputs.is_lerna }}
 
 runs:
   using: "composite"
@@ -15,6 +11,8 @@ runs:
       - name: Update dependencies
         shell: bash
         run: npm ls --json |  jq -r '.dependencies | keys[]' | grep "@netcracker" | xargs --no-run-if-empty npm update
+        env:
+          NODE_AUTH_TOKEN: ${{ env.GITHUB_TOKEN }}
 
       - name: Check is Lerna project
         shell: bash
