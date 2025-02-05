@@ -15,6 +15,8 @@ runs:
       - name: Update dependencies
         shell: bash
         run: npm ls --json |  jq -r '.dependencies | keys[]' | grep "@netcracker" | xargs --no-run-if-empty npm update
+        env:
+          NODE_AUTH_TOKEN: ${{ secret.node-auth-token }}
 
       - name: Check is Lerna project
         shell: bash
