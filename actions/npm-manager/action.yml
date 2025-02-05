@@ -1,4 +1,4 @@
-name: "Update Dependencies & Bump Version"
+name: "Update & Bump Version"
 description: ""
 inputs:
   node-auth-token:
