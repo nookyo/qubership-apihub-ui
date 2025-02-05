@@ -1,0 +1,29 @@
+name: Manual Trigger - Update Dependencies & Bump Version
+
+on:
+  workflow_dispatch: # Позволяет запускать вручную через GitHub Actions UI
+
+jobs:
+  update-deps-and-bump:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://npm.pkg.github.com/'
+
+      - name: Run Dependency & Version Manager
+        uses: ./actions/npm-manager
+
+      - name: Check Changes After Version Bump
+        run: |
+          if [ -s changes.txt ]; then
+            echo "Detected changes after version bump:"
+            cat changes.txt
+          else
+            echo "No changes detected."
+          fi
