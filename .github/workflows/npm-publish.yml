@@ -12,7 +12,7 @@ on:
         description: "Node.js version (e.g., 20)"
         required: true
       registry-url:
-        default: "https://registry.npmjs.org/"
+        default: "'https://npm.pkg.github.com"
         description: "NPM registry URL"
         required: false
       update-nc-dependency:
@@ -43,28 +43,29 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Update dependencies
-        if: ${{ github.event.inputs.update-nc-dependency == 'true' }}
-        run: npm ls --json |  jq -r '.dependencies | keys[]' | grep "@netcracker" | xargs --no-run-if-empty npm update
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    #   - name: Update dependencies
+    #     if: ${{ github.event.inputs.update-nc-dependency == 'true' }}
+    #     run: npm ls --json |  jq -r '.dependencies | keys[]' | grep "@netcracker" | xargs --no-run-if-empty npm update
+    #     env:
+    #       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 
-      - name: Update package version
-        run: |
-            npm version ${{ github.event.inputs.version }} --no-git-tag-version
+    #   - name: Update package version
+    #     run: |
+    #         npm version ${{ github.event.inputs.version }} --no-git-tag-version
 
-            git diff --color
-            git diff >> changes.txt
+    #         git diff --color
+    #         git diff >> changes.txt
 
-      - name: Check if build script exists and run build
-        run: |
-            if npm run | grep -q "build"; then
-              npm run build
-            else
-              echo "Build script not found in package.json. Stopping workflow."
-              exit 1
-            fi
+    #   - name: Check if build script exists and run build
+    #     run: |
+    #         if npm run | grep -q "build"; then
+    #           npm run build
+    #         else
+    #           echo "Build script not found in package.json. Stopping workflow."
+    #           exit 1
+    #         fi
 
     #   - name: Commit version update
     #     run: |
