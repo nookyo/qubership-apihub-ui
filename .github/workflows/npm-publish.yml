@@ -1,0 +1,71 @@
+name: Manual NPM Publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        default: "1.0.1"
+        description: "New version (e.g., 1.0.1)"
+        required: true
+      node-version:
+        default: "20"
+        description: "Node.js version (e.g., 20)"
+        required: true
+      registry-url:
+        default: "https://registry.npmjs.org/"
+        description: "NPM registry URL"
+        required: false
+      update-nc-dependency:
+        default: "false"
+        description: "Update dependencies"
+        required: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ github.event.inputs.node-version }}
+          registry-url: ${{ github.event.inputs.registry-url }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check if build script exists and run build
+        run: |
+          if npm run | grep -q "build"; then
+            npm run build
+          else
+            echo "Build script not found in package.json. Stopping workflow."
+            exit 1
+          fi
+
+      - name: Update dependencies
+        if: ${{ github.event.inputs.update-nc-dependency == 'true' }}
+        run: npm ls --json |  jq -r '.dependencies | keys[]' | grep "@netcracker" | xargs --no-run-if-empty npm update
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update package version
+        run: npm version ${{ github.event.inputs.version }} --no-git-tag-version
+
+    #   - name: Commit version update
+    #     run: |
+    #       git config --global user.name "github-actions[bot]"
+    #       git config --global user.email "github-actions[bot]@users.noreply.github.com"
+    #       git add package.json package-lock.json
+    #       git commit -m "chore: bump version to ${{ github.event.inputs.version }}"
+    #       git push origin main
+
+    #   - name: Publish to NPM
+    #     run: npm publish
+    #     env:
+    #       NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
