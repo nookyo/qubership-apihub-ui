@@ -37,19 +37,12 @@ jobs:
             node-version: ${{ github.event.inputs.node-version }}
             registry-url: ${{ github.event.inputs.registry-url }}
 
-
       - name: Install dependencies
         run: npm ci --legacy-peer-deps
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
 
       - name: Update dependencies
         if: ${{ github.event.inputs.update-nc-dependency == 'true' }}
         run: npm ls --json |  jq -r '.dependencies | keys[]' | grep "@netcracker" | xargs --no-run-if-empty npm update
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
 
       - name: Update package version
         run: |
@@ -68,8 +61,6 @@ jobs:
               exit 1
             fi
 
-        # run: npm run build --if-present
-
       - name: Run tests
         run: npm test --if-present
 
@@ -83,6 +74,10 @@ jobs:
           fi
           echo "package_version=$VERSION" >> $GITHUB_OUTPUT
 
+      - name: asd
+        uses: ./actions/commit-and-push@master
+        with:
+          branch_name: 'main'
 
     #   - name: Commit version update
     #     run: |
