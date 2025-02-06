@@ -17,7 +17,7 @@ on:
         required: false
       update-nc-dependency:
         type: boolean
-        default: true
+        default: false
         description: "Update dependencies"
         required: false
 
