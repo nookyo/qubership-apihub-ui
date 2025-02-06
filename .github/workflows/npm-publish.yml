@@ -31,74 +31,77 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-            node-version: ${{ github.event.inputs.node-version }}
-            registry-url: ${{ github.event.inputs.registry-url }}
+          node-version: ${{ github.event.inputs.node-version }}
+          registry-url: ${{ github.event.inputs.registry-url }}
 
       - name: Install dependencies
         run: npm ci --legacy-peer-deps
 
-      - name: Update dependencies
+
+      - name: Check if project is a Lerna monorepo
+        id: check-lerna
+        run: |
+          if [ -f lerna.json ]; then
+            echo "Lerna project detected."
+            echo "IS_LERNA=true" >> $GITHUB_ENV
+          else
+            echo "Not a Lerna project."
+            echo "IS_LERNA=false" >> $GITHUB_ENV
+          fi
+
+      - name: Update dependencies (if required)
         if: ${{ github.event.inputs.update-nc-dependency == 'true' }}
-        run: npm ls --json |  jq -r '.dependencies | keys[]' | grep "@netcracker" | xargs --no-run-if-empty npm update
-
-      - name: Update package version
         run: |
+          npm ls --json | jq -r '.dependencies | keys[]' | grep "@netcracker" | xargs --no-run-if-empty npm update
+
+      - name: Update package version (for Lerna or NPM)
+        run: |
+          if [ "$IS_LERNA" = "true" ]; then
+            echo "Updating version in lerna.json and all package.json files..."
+            npx lerna version ${{ github.event.inputs.version }} --yes --no-git-tag-version --no-push
+          else
+            echo "Updating version in package.json..."
             npm version ${{ github.event.inputs.version }} --no-git-tag-version
+          fi
+          git diff --color
+          git diff >> changes.txt
 
-            git diff --color
-            git diff >> changes.txt
-
-
-      - name: Check if build script exists and run build
-        run: |
-            if npm run | grep -q "build"; then
-              npm run build
-            else
-              echo "Build script not found in package.json. Stopping workflow."
-              exit 1
-            fi
-
-      - name: Run tests
-        run: npm test --if-present
 
       - name: Get package version
         id: get_version
         run: |
-          if [ "$IS_LERNA" == "true" ]; then
-            VERSION=$(lerna list --json | jq -r '.[0].version')
+            if [ "$IS_LERNA" == "true" ]; then
+              VERSION=$(lerna list --json | jq -r '.[0].version')
+            else
+              VERSION=$(jq -r '.version' package.json)
+            fi
+            echo "package_version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Build Project
+        run: |
+          if npm run | grep -q "build"; then
+            npm run build
           else
-            VERSION=$(jq -r '.version' package.json)
+            echo "Build script not found in package.json. Stopping workflow."
+            exit 1
           fi
-          echo "package_version=$VERSION" >> $GITHUB_OUTPUT
 
+      - name: Run tests
+        run: npm test --if-present
 
-      # - name: Publish to GitHub NPM Registry
-      #   id: publish
-      #   run: |
-      #       CURRENT_BRANCH=$(echo $GITHUB_REF | sed 's/refs\/heads\///')
-      #       if [ "$CURRENT_BRANCH" == "main" ]; then
-      #         TAG_NAME="latest"
-      #       elif [ "$CURRENT_BRANCH" == "release" ]; then
-      #         TAG_NAME="next"
-      #       elif [ "$CURRENT_BRANCH" == "develop" ]; then
-      #         TAG_NAME="dev"
-      #       elif [[ "$CURRENT_BRANCH" == feature/* ]]; then
-      #         TAG_NAME="${CURRENT_BRANCH//\//-}"
-      #       fi
-      #       echo "npm_dist_tag=$TAG_NAME" >> $GITHUB_OUTPUT
-      #       if [ -n "$TAG_NAME" ]; then
-      #         if [ "$IS_LERNA" == "true" ]; then
-      #           lerna publish from-package --yes --no-push --no-git-reset --no-git-tag-version --dist-tag "$TAG_NAME"
-      #         else
-      #           npm publish --tag "$TAG_NAME"
-      #         fi
-      #       fi
-
-      - name: Publish to NPM
-        run: npm publish --tag "next"
+      - name: Publish Package
+        run: |
+          if [ "$IS_LERNA" = "true" ]; then
+            echo "Publishing with Lerna..."
+            npx lerna publish from-package --yes --no-push --no-git-reset --no-git-tag-version --dist-tag next
+          else
+            echo "Publishing with npm..."
+            npm publish --tag "next"
+          fi
 
       - name: Commit and Push changes
         uses: ./actions/commit-and-push@master
