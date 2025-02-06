@@ -94,7 +94,7 @@ jobs:
         run: npm test --if-present
 
       - name: Commit and Push changes
-        uses: ./actions/commit-and-push@master
+        uses: ./actions/commit-and-push
         with:
           branch_name: 'main'
 
