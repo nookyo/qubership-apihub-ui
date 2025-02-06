@@ -74,20 +74,12 @@ jobs:
           fi
           echo "package_version=$VERSION" >> $GITHUB_OUTPUT
 
-      - name: asd
+      - name: Commit and Push changes
         uses: ./actions/commit-and-push@master
         with:
           branch_name: 'main'
 
-    #   - name: Commit version update
-    #     run: |
-    #       git config --global user.name "github-actions[bot]"
-    #       git config --global user.email "github-actions[bot]@users.noreply.github.com"
-    #       git add package.json package-lock.json
-    #       git commit -m "chore: bump version to ${{ github.event.inputs.version }}"
-    #       git push origin main
-
-    #   - name: Publish to NPM
-    #     run: npm publish
-    #     env:
-    #       NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Publish to NPM
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
