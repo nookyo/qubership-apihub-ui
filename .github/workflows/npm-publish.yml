@@ -106,6 +106,7 @@ jobs:
 
       - name: Publish Package
         run: |
+          npm config get registry
           if [ "$IS_LERNA" = "true" ]; then
             echo "Publishing with Lerna..."
             npx lerna publish from-package --yes --no-push --no-git-reset --no-git-tag-version --dist-tag next
