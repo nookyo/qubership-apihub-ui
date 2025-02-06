@@ -74,12 +74,35 @@ jobs:
           fi
           echo "package_version=$VERSION" >> $GITHUB_OUTPUT
 
+
+      # - name: Publish to GitHub NPM Registry
+      #   id: publish
+      #   run: |
+      #       CURRENT_BRANCH=$(echo $GITHUB_REF | sed 's/refs\/heads\///')
+      #       if [ "$CURRENT_BRANCH" == "main" ]; then
+      #         TAG_NAME="latest"
+      #       elif [ "$CURRENT_BRANCH" == "release" ]; then
+      #         TAG_NAME="next"
+      #       elif [ "$CURRENT_BRANCH" == "develop" ]; then
+      #         TAG_NAME="dev"
+      #       elif [[ "$CURRENT_BRANCH" == feature/* ]]; then
+      #         TAG_NAME="${CURRENT_BRANCH//\//-}"
+      #       fi
+      #       echo "npm_dist_tag=$TAG_NAME" >> $GITHUB_OUTPUT
+      #       if [ -n "$TAG_NAME" ]; then
+      #         if [ "$IS_LERNA" == "true" ]; then
+      #           lerna publish from-package --yes --no-push --no-git-reset --no-git-tag-version --dist-tag "$TAG_NAME"
+      #         else
+      #           npm publish --tag "$TAG_NAME"
+      #         fi
+      #       fi
+
+      - name: Publish to NPM
+        run: npm publish --tag "$TAG_NAME"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
       - name: Commit and Push changes
         uses: ./actions/commit-and-push@master
         with:
           branch_name: 'main'
-
-      - name: Publish to NPM
-        run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
