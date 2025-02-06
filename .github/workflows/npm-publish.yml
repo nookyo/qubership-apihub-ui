@@ -93,6 +93,11 @@ jobs:
       - name: Run tests
         run: npm test --if-present
 
+      - name: Commit and Push changes
+        uses: ./actions/commit-and-push@master
+        with:
+          branch_name: 'main'
+
       - name: Publish Package
         run: |
           if [ "$IS_LERNA" = "true" ]; then
@@ -102,8 +107,3 @@ jobs:
             echo "Publishing with npm..."
             npm publish --tag "next"
           fi
-
-      - name: Commit and Push changes
-        uses: ./actions/commit-and-push@master
-        with:
-          branch_name: 'main'
